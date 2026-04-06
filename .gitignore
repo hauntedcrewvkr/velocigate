@@ -1,5 +1,6 @@
 node_modules
 .env
+.env.local
 .DS_Store
 dist
 dist-ssr
@@ -7,3 +8,5 @@ dist-ssr
 GEMINI.md
 frontend/node_modules
 frontend/dist
+frontend/.env
+frontend/.env.local
