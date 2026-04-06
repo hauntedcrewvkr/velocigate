@@ -1,0 +1,35 @@
+{
+  "name": "velocigate",
+  "version": "1.0.0",
+  "description": "Smart API Rate Limiter (Adaptive + Distributed)",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "server": "node src/server.js",
+    "client": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rate-limiter",
+    "adaptive",
+    "distributed",
+    "redis",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.12.1",
+    "morgan": "^1.10.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
