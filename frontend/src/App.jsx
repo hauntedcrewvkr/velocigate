@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import './index.scss';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 axios.defaults.baseURL = API_URL;
 
 const Countdown = ({ expiresAt, onComplete }) => {
