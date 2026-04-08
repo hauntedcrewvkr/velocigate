@@ -6,30 +6,41 @@ const router = Router();
 
 router.get('/stats', async (req, res) => {
   const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const now = new Date();
   
-  const total = await LogModel.countDocuments({ timestamp: { $gt: last24h } });
-  const blocked = await LogModel.countDocuments({ 
-    timestamp: { $gt: last24h },
-    status: 429 
-  });
-  
-  const topIps = await LogModel.aggregate([
-    { $match: { timestamp: { $gt: last24h } } },
-    { $group: { _id: '$ip', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 10 }
-  ]);
+  try {
+    const [counts, topIps, activeBansCount, activeBansList] = await Promise.all([
+      LogModel.aggregate([
+        { $match: { timestamp: { $gt: last24h } } },
+        { $group: {
+            _id: null,
+            total: { $sum: 1 },
+            blocked: { $sum: { $cond: [{ $eq: ['$status', 429] }, 1, 0] } }
+        }}
+      ]),
+      LogModel.aggregate([
+        { $match: { timestamp: { $gt: last24h } } },
+        { $group: { _id: '$ip', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 }
+      ]),
+      BanModel.countDocuments({ expiresAt: { $gt: now } }),
+      BanModel.find({ expiresAt: { $gt: now } }).sort({ expiresAt: -1 }).limit(10)
+    ]);
 
-  const activeBansCount = await BanModel.countDocuments({ expiresAt: { $gt: new Date() } });
-  const activeBansList = await BanModel.find({ expiresAt: { $gt: new Date() } }).sort({ expiresAt: -1 }).limit(10);
+    const stats = counts[0] || { total: 0, blocked: 0 };
 
-  res.json({
-    totalRequests24h: total,
-    blockedRequests24h: blocked,
-    topOffenders: topIps,
-    activeBans: activeBansCount,
-    activeBansList
-  });
+    res.json({
+      totalRequests24h: stats.total,
+      blockedRequests24h: stats.blocked,
+      topOffenders: topIps,
+      activeBans: activeBansCount,
+      activeBansList
+    });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
 });
 
 router.get('/usage', async (req, res) => {

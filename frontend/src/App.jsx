@@ -85,7 +85,7 @@ function App() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 2000); // Poll every 2s instead of 5s
     return () => clearInterval(interval);
   }, []);
 
@@ -117,7 +117,7 @@ function App() {
       setIsAttacking(false);
       fetchData();
       setLastLog({ status: 'DONE', message: 'Attack Simulation Complete' });
-    }, 1000);
+    }, 200); // Reduce from 1000ms to 200ms
   };
 
   const clearData = async () => {
