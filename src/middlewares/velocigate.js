@@ -23,9 +23,8 @@ export const velocigate = (options = {}) => {
       const limit = 30;
       const window = 60;
 
-      const key = `rl:${ip}:${endpoint}`;
       const { success } = await checkSlidingWindow({
-        key,
+        ip,
         limit,
         windowSizeInSeconds: window
       });

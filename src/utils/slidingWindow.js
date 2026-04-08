@@ -1,26 +1,21 @@
-import cache from '../config/cache.js';
+import { LogModel } from '../models/models.js';
 
 export const checkSlidingWindow = async ({
   windowSizeInSeconds,
   limit,
-  key,
+  ip,
 }) => {
-  const now = Date.now();
-  const windowStart = now - windowSizeInSeconds * 1000;
+  const windowStart = new Date(Date.now() - windowSizeInSeconds * 1000);
 
-  let timestamps = cache.get(key) || [];
-
-  // Filter old timestamps and add current
-  timestamps = timestamps.filter(ts => ts > windowStart);
-  timestamps.push(now);
-
-  cache.set(key, timestamps, windowSizeInSeconds + 5);
-
-  const count = timestamps.length;
+  // Count existing logs in the window for this IP
+  const count = await LogModel.countDocuments({ 
+    ip, 
+    timestamp: { $gt: windowStart } 
+  });
 
   return { 
-    success: count <= limit, 
-    current: count, 
+    success: count < limit, 
+    current: count + 1, // Include the current request
     limit 
   };
 };
