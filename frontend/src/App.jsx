@@ -13,7 +13,12 @@ import {
 import './index.scss';
 
 const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-axios.defaults.baseURL = API_URL;
+if (import.meta.env.PROD && !API_URL) {
+  // In production, if no URL is provided, we use relative paths (same domain)
+  axios.defaults.baseURL = '';
+} else {
+  axios.defaults.baseURL = API_URL;
+}
 
 const Countdown = ({ expiresAt, onComplete }) => {
   const [timeLeft, setTimeLeft] = useState(0);
