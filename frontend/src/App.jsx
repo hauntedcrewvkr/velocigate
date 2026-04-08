@@ -68,8 +68,11 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [lastLog, setLastLog] = useState(null);
   const [isAttacking, setIsAttacking] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchData = async () => {
+    if (isFetching) return;
+    setIsFetching(true);
     try {
       const [statsRes, usageRes] = await Promise.all([
         axios.get('/admin/stats'),
@@ -79,13 +82,16 @@ function App() {
       setUsage(usageRes.data);
       setLoading(false);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       console.error('Fetch error:', err);
+    } finally {
+      setIsFetching(false);
     }
   };
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 2000); // Poll every 2s instead of 5s
+    const interval = setInterval(fetchData, 5000); // Back to 5s for stability
     return () => clearInterval(interval);
   }, []);
 
