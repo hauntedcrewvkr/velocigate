@@ -4,7 +4,7 @@ import cache from '../config/cache.js';
 
 const router = Router();
 
-router.get('/stats', async (req, res) => {
+router.get('/dashboard', async (req, res) => {
   const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const now = new Date();
   
@@ -31,23 +31,22 @@ router.get('/stats', async (req, res) => {
     const stats = counts[0] || { total: 0, blocked: 0 };
 
     res.json({
-      totalRequests24h: stats.total,
-      blockedRequests24h: stats.blocked,
-      topOffenders: topIps,
-      activeBans: activeBansCount,
-      activeBansList
+      stats: {
+        totalRequests24h: stats.total,
+        blockedRequests24h: stats.blocked,
+        topOffenders: topIps,
+        activeBans: activeBansCount,
+        activeBansList
+      },
+      usage: {
+        status: 'healthy',
+        uptime: process.uptime()
+      }
     });
   } catch (error) {
-    console.error('Stats error:', error);
-    res.status(500).json({ error: 'Failed to fetch stats' });
+    console.error('Dashboard error:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard data' });
   }
-});
-
-router.get('/usage', async (req, res) => {
-  res.json({
-    status: 'healthy',
-    uptime: process.uptime()
-  });
 });
 
 router.post('/clear', async (req, res) => {

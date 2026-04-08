@@ -70,16 +70,13 @@ function App() {
   const [isAttacking, setIsAttacking] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
-  const fetchData = async () => {
-    if (isFetching) return;
+  const fetchData = async (force = false) => {
+    if (isFetching && !force) return;
     setIsFetching(true);
     try {
-      const [statsRes, usageRes] = await Promise.all([
-        axios.get('/admin/stats'),
-        axios.get('/debug/usage')
-      ]);
-      setStats(statsRes.data);
-      setUsage(usageRes.data);
+      const { data } = await axios.get('/admin/dashboard');
+      setStats(data.stats);
+      setUsage(data.usage);
       setLoading(false);
     } catch (err) {
       if (axios.isCancel(err)) return;
@@ -107,7 +104,7 @@ function App() {
         message: retry ? `${msg} (Wait ${retry}s)` : msg 
       });
     }
-    fetchData();
+    fetchData(true);
   };
 
   const simulateAttack = async () => {
@@ -121,7 +118,7 @@ function App() {
     
     setTimeout(() => {
       setIsAttacking(false);
-      fetchData();
+      fetchData(true);
       setLastLog({ status: 'DONE', message: 'Attack Simulation Complete' });
     }, 200); // Reduce from 1000ms to 200ms
   };
@@ -131,7 +128,7 @@ function App() {
     try {
       await axios.post('/admin/clear');
       setLastLog({ status: 'CLEARED', message: 'All data wiped' });
-      fetchData();
+      fetchData(true);
     } catch (err) {
       console.error('Clear error:', err);
     }
